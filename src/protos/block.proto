@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package stordy.block;
+
+service BlockService {
+  rpc AddBlock(Block) returns (Empty) {}
+  rpc FindBlock(FindBlockRequest) returns (Block) {}
+  rpc LengthBlock(LengthRequest) returns (LengthReply) {}
+  rpc GetLastBlock(Empty) returns (Block) {}
+  rpc Length(Empty) returns (LengthReply) {}
+  rpc GetFullChain(Empty) returns (GetFullChainReply) {}
+}
+
+message Empty { }
+
+message GetFullChainReply {
+  repeated Block blocks = 1;
+}
+
+message Block {
+  uint32 index = 1;
+  string previous_hash = 2;
+  uint64 timestamp = 3;
+  string hash = 4;
+  uint32 nonce = 5;
+  string public_key = 6;
+  string block_context = 7;
+  string device = 8;
+  string previous_expired_block_hash = 9;
+  string previous_block_signature = 10;  
+}
+
+message FindBlockRequest {
+  string public_key = 1;
+}
+
+message LengthRequest {
+  string public_key  = 1;
+}
+
+message LengthReply {
+  uint32 length = 1;
+}
+

@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package stordy.transaction;
+
+service TransactionService {
+  rpc AddTransaction(AddTransactionRequest) returns (Empty) {}
+  rpc FindTransactionByHash(FindTransactionByHashRequest) returns (Transaction) {}
+  rpc ExistsTransactionOnBlock(ExistsTransactionOnBlockRequet) returns (ExistsTransactionOnBlockReply) {}
+  rpc FindLastTransaction(FindLastTransactionRequest) returns (Transaction) {}
+  rpc FindAllTransactions(FindAllTransactionsRequest) returns (FindAllTransactionsReply) {}
+}
+
+message Transaction {
+  uint32 index = 1;
+  string previousHash = 2;
+  uint64 timestamp = 3;
+  string data = 4;
+  string signature = 5;
+  uint32 nonce = 6;
+  string identification = 7;
+  string hash = 8;
+}
+
+message FindAllTransactionsRequest {
+  string block_public_key = 1;
+}
+
+message FindAllTransactionsReply {
+  repeated Transaction transactions = 1;
+}
+
+message AddTransactionRequest {
+  string block_public_key = 1;
+  Transaction transaction = 2;
+  optional int32 qtd = 3;
+}
+
+message Empty {}
+
+message FindTransactionByHashRequest {
+  string hash = 1;
+}
+
+message ExistsTransactionOnBlockRequet {
+  string block_public_key = 1;
+  string transaction_hash = 2;
+}
+
+message ExistsTransactionOnBlockReply {
+  bool exists = 1;
+}
+
+message FindLastTransactionRequest {
+  string block_public_key = 1;
+}
