@@ -2,7 +2,7 @@ use crate::transaction::btree::BTree;
 use block::block_service_server::BlockService;
 use itertools::Itertools;
 use prost::Message;
-use std::io::{Read, Seek};
+use std::io::{self, Read, Seek};
 use std::sync::{Arc, Mutex};
 use std::{fs, vec};
 use tonic::{Request, Response, Status};
@@ -49,7 +49,10 @@ impl BlockService for Block {
         let uuid = Uuid::now_v7();
         // println!("UUID: {:?}", uuid.clone().to_string());
         // println!("UUID: {:?}", uuid.clone().to_string().as_bytes().to_vec());
-        db.insert(block.public_key.clone(), uuid.to_string().as_bytes().to_vec());
+        db.insert(
+            block.public_key.clone(),
+            uuid.to_string().as_bytes().to_vec(),
+        );
 
         let mut buf_block = vec![];
         block.encode(&mut buf_block).unwrap();
@@ -88,11 +91,23 @@ impl BlockService for Block {
         }
 
         let id = id.unwrap();
+        let filename = format!("blocks/{}", String::from_utf8(id).unwrap());
+
+        let mut file = fs::File::open(&filename).unwrap();
+        file.seek(io::SeekFrom::Start(0)).unwrap();
+        let mut buffer = [0; 2];
+        file.read_exact(&mut buffer).unwrap();
+        let block_size = u16::from_be_bytes(buffer);
+        let mut buf = vec![0; block_size as usize];
+        file.seek(io::SeekFrom::Start(2)).unwrap();
+        file.read_exact(&mut buf).unwrap();
+        let block = block::Block::decode(&*buf).unwrap();
 
         // println!("ID: {}", String::from_utf8(id.clone()).unwrap());
-        let buf = fs::read(format!("blocks/{}", String::from_utf8(id).unwrap())).unwrap();
-        let block_size = u16::from_be_bytes([buf[0], buf[1]]);
-        let block = block::Block::decode(&buf[2..block_size as usize + 2]).unwrap();
+        // let buf = fs::read(format!("blocks/{}", String::from_utf8(id).unwrap())).unwrap();
+        // let block_size = u16::from_be_bytes([buf[0], buf[1]]);
+        // let block = block::Block::decode(&buf[2..block_size as usize + 2]).unwrap();
+        //
 
         Ok(Response::new(block))
     }
@@ -119,13 +134,13 @@ impl BlockService for Block {
         let mut file = fs::File::open(&filename).unwrap();
         let size_of_file = file.metadata()?.len();
         file.seek(std::io::SeekFrom::Start(0)).unwrap();
-        let mut size_of_header_buf = [0;2];
+        let mut size_of_header_buf = [0; 2];
         file.read_exact(&mut size_of_header_buf).unwrap();
         let size_of_header = u16::from_be_bytes(size_of_header_buf);
         let mut pointer = u64::from(size_of_header + 2);
         while pointer < size_of_file {
             file.seek(std::io::SeekFrom::Start(pointer as u64)).unwrap();
-            let mut size_of_transaction_buf = [0;2];
+            let mut size_of_transaction_buf = [0; 2];
             file.read_exact(&mut size_of_transaction_buf).unwrap();
             let size_of_transaction = u16::from_be_bytes(size_of_transaction_buf);
             pointer += u64::from(size_of_transaction + 4);
@@ -133,7 +148,7 @@ impl BlockService for Block {
         }
 
         let response = block::LengthReply { length };
-        
+
         Ok(Response::new(response))
     }
 

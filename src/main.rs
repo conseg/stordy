@@ -13,6 +13,7 @@ use transaction::{
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Stordy initialize!!");
     let addr = "0.0.0.0:50052".parse()?;
 
     let btree_blocks = Arc::new(Mutex::new(BTree::new("blocks")));
@@ -34,4 +35,3 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
