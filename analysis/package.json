@@ -1,0 +1,12 @@
+{
+  "name": "analysis",
+  "version": "1.0.0",
+  "description": "This project analyzes the performance of the Speedychain blockchain with and without the Stordy optimization, comparing various metrics such as transaction sizes, disk usage, and transaction times.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
